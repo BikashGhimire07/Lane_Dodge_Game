@@ -1,0 +1,23 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "g++ build OpenGL game",
+			"type": "shell",
+			"command": "g++",
+			"args": [
+				"-g",
+				"game.cpp",
+				"-o",
+				"game.exe",
+				"-lfreeglut",
+				"-lopengl32",
+				"-lglu32"
+			],
+			"group": "build",
+			"problemMatcher": [
+				"$gcc"
+			]
+		}
+	]
+}
