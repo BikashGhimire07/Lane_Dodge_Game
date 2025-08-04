@@ -46,20 +46,18 @@ void stopMP3(const char* alias) {
 
 
 void handleAudio() {
+    // Always play normal background music
+    if (!normalMusicPlaying) {
+        playMP3("normal", "audio/normal.mp3", true);
+        normalMusicPlaying = true;
+    }
+    // Play crash sound on top if crashed
     if (playerCrashed) {
-        if (normalMusicPlaying) {
-            stopMP3("normal");
-            normalMusicPlaying = false;
-        }
         if (!crashMusicPlaying) {
             playMP3("crash", "audio/crashed.mp3", false);
             crashMusicPlaying = true;
         }
     } else {
-        if (!normalMusicPlaying) {
-            playMP3("normal", "audio/normal.mp3", true);
-            normalMusicPlaying = true;
-        }
         if (crashMusicPlaying) {
             stopMP3("crash");
             crashMusicPlaying = false;
@@ -81,10 +79,8 @@ void mouseMenu(int button, int state, int x, int y) {
     float quitBtnX = SCREEN_WIDTH/2 + 20, quitBtnY = playBtnY;
    
     if (x >= playBtnX && x <= playBtnX + btnW && oglY >= playBtnY && oglY <= playBtnY + btnH) {
-        
         showMenu = false;
         if (gameOver) {
-           
             playerLane = 1;
             playerLaneOffset = 2;
             playerY = PLAYER_START_Y;
@@ -99,7 +95,6 @@ void mouseMenu(int button, int state, int x, int y) {
             activeOppositeCars = 0;
             initOppositeCars();
             initLaneDividers();
-        
             HWND hwnd = FindWindowA(NULL, "Lane Dodge Car Game");
             if (hwnd) {
                 HMENU hMenu = GetSystemMenu(hwnd, FALSE);
@@ -107,9 +102,8 @@ void mouseMenu(int button, int state, int x, int y) {
                     EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
                 }
             }
-            
-            glutTimerFunc(1000 / 60, timer, 0);
         }
+        glutTimerFunc(1000 / 60, timer, 0);
         glutPostRedisplay();
         return;
     }
@@ -325,7 +319,10 @@ void display() {
 }
 
 void timer(int value) {
-    // Remove playerY movement so player car stays fixed
+    if (showMenu) {
+        // Don't run game logic or timer until PLAY is pressed
+        return;
+    }
 
     // Move lane dividers down always at playerBaseSpeed (simulate road movement)
     for (int i = 0; i < NUM_LANE_DIVIDERS; i++) {
@@ -387,12 +384,12 @@ void timer(int value) {
     }
 
     // Move only active cars (opposing cars always move at their own speed)
-        for (int i = 0; i < activeOppositeCars; i++) {
+    for (int i = 0; i < activeOppositeCars; i++) {
         if (!oppositeCars[i].active) continue;
 
         // Smooth lane change logic
         if (oppositeCars[i].isChangingLane) {
-                        oppositeCars[i].laneChangeProgress += 0.02f; // Speed of lane change
+            oppositeCars[i].laneChangeProgress += 0.02f; // Speed of lane change
             if (oppositeCars[i].laneChangeProgress >= 1.0f) {
                 oppositeCars[i].laneChangeProgress = 1.0f;
                 oppositeCars[i].lane = oppositeCars[i].targetLane;
@@ -494,7 +491,7 @@ void timer(int value) {
                 if (!laneOccupied && leftLane == playerLane && fabs(playerY - oppositeCars[i].y) < CAR_HEIGHT + 10) {
                     laneOccupied = true;
                 }
-                                if (!laneOccupied) {
+                if (!laneOccupied) {
                     if (!oppositeCars[i].isChangingLane) {
                         oppositeCars[i].isChangingLane = true;
                         oppositeCars[i].targetLane = leftLane;
@@ -516,7 +513,7 @@ void timer(int value) {
                 if (!laneOccupied && rightLane == playerLane && fabs(playerY - oppositeCars[i].y) < CAR_HEIGHT + 10) {
                     laneOccupied = true;
                 }
-                                if (!laneOccupied) {
+                if (!laneOccupied) {
                     if (!oppositeCars[i].isChangingLane) {
                         oppositeCars[i].isChangingLane = true;
                         oppositeCars[i].targetLane = rightLane;
@@ -559,7 +556,7 @@ void timer(int value) {
                 }
                 attempts++;
             } while (overlapRespawn && attempts < 20);
-                        oppositeCars[i].lane = newLane;
+            oppositeCars[i].lane = newLane;
             oppositeCars[i].x = lanePosX(newLane, 2, oppositeCars[i].width);
             oppositeCars[i].isChangingLane = false;
             oppositeCars[i].laneChangeProgress = 0.0f;
