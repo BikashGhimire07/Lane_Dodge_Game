@@ -1,5 +1,3 @@
-
-// =================== Includes ===================
 #include <windows.h>
 #include <mmsystem.h>
 #include <cstdio>
@@ -16,7 +14,7 @@
 #include "hud.h"
 #include "input.h"
 
-// Ensure GLUT mouse constants are available before mouseMenu
+
 #ifndef GLUT_LEFT_BUTTON
 #define GLUT_LEFT_BUTTON 0
 #endif
@@ -24,13 +22,10 @@
 #define GLUT_DOWN 0
 #endif
 
-// =================== Global Variables ===================
 bool normalMusicPlaying = false;
 bool crashMusicPlaying = false;
 
-// =================== Function Definitions ===================
 
-// Audio helper functions for MP3 playback
 void playMP3(const char* alias, const char* filename, bool loop) {
     char cmd[256];
     sprintf(cmd, "open \"%s\" type mpegvideo alias %s", filename, alias);
@@ -47,10 +42,8 @@ void stopMP3(const char* alias) {
     mciSendString(cmd, NULL, 0, NULL);
 }
 
-// Audio state (should be extern in header, defined in game.cpp)
-extern bool normalMusicPlaying;
-extern bool crashMusicPlaying;
-extern bool playerCrashed;
+
+
 
 void handleAudio() {
     if (playerCrashed) {
@@ -75,36 +68,23 @@ void handleAudio() {
 }
 
 // Mouse handler for menu buttons
-extern bool showMenu;
-extern bool gameOver;
-extern int playerLane;
-extern int playerLaneOffset;
-extern float playerY;
-extern bool playerVisible;
-extern int score;
-extern int lives;
-extern float playerKmh;
-extern float playerBaseSpeed;
-extern float playerMaxSpeed;
-extern int activeOppositeCars;
-extern void initOppositeCars();
-extern void initLaneDividers();
+
 
 void mouseMenu(int button, int state, int x, int y) {
     if (!showMenu && !gameOver) return;
     if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN) return;
     // Convert y to OpenGL coordinates (origin at bottom left)
     int oglY = SCREEN_HEIGHT - y;
-    // Button positions must match those in drawMenu()
+   
     float btnW = 120, btnH = 40;
     float playBtnX = SCREEN_WIDTH/2 - btnW - 20, playBtnY = SCREEN_HEIGHT/2 - 40;
     float quitBtnX = SCREEN_WIDTH/2 + 20, quitBtnY = playBtnY;
-    // Check Play button
+   
     if (x >= playBtnX && x <= playBtnX + btnW && oglY >= playBtnY && oglY <= playBtnY + btnH) {
-        // Start or restart game
+        
         showMenu = false;
         if (gameOver) {
-            // Reset all game state for restart
+           
             playerLane = 1;
             playerLaneOffset = 2;
             playerY = PLAYER_START_Y;
@@ -119,7 +99,7 @@ void mouseMenu(int button, int state, int x, int y) {
             activeOppositeCars = 0;
             initOppositeCars();
             initLaneDividers();
-            // Re-enable the window close (X) button
+        
             HWND hwnd = FindWindowA(NULL, "Lane Dodge Car Game");
             if (hwnd) {
                 HMENU hMenu = GetSystemMenu(hwnd, FALSE);
@@ -127,33 +107,18 @@ void mouseMenu(int button, int state, int x, int y) {
                     EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
                 }
             }
-            // Restart the timer so the game resumes
+            
             glutTimerFunc(1000 / 60, timer, 0);
         }
         glutPostRedisplay();
         return;
     }
-    // Check Quit button
+
     if (x >= quitBtnX && x <= quitBtnX + btnW && oglY >= quitBtnY && oglY <= quitBtnY + btnH) {
         exit(0);
     }
 }
-#include <windows.h>
-#include <GL/glut.h>
-#include <stdlib.h>
-#include <time.h>
-#include <stdio.h>
-#include <math.h>
-#include <string>
-#include<iostream>
-#include "constants.h"
-#include "utils.h"
-#include "player.h"
-#include "vehicle.h"
-#include "road.h"
-#include "hud.h"
-#include "input.h"
-using namespace std;
+
 
 
 

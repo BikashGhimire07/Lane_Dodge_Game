@@ -1,7 +1,10 @@
 
+
+
 #include <GL/glut.h>
 #include <windows.h>
 #include <cstdlib>
+#include "constants.h"
 #include "input.h"
 #include "utils.h"
 #include "game.h"
@@ -10,9 +13,6 @@
 #include "road.h"
 #include "hud.h"
 
-#define PLAYER_START_Y 50
-#define PLAYER_INITIAL_KMH 60.0f
-#define KMH_TO_PIXELS_PER_FRAME(kmh) ((kmh) * 0.18f)
 
 void keyboard(int key, int x, int y) {
     if (playerCrashed) return;

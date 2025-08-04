@@ -1,5 +1,5 @@
 
-// =================== Includes ===================
+
 #include <GL/glut.h>
 #include <cstdlib>
 #include <ctime>

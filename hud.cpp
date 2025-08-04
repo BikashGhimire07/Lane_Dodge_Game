@@ -1,5 +1,4 @@
 
-// =================== Includes ===================
 #include <fstream>
 #include <cstdio>
 #include <GL/glut.h>

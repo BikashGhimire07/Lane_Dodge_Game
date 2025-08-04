@@ -13,8 +13,6 @@ void updateLaneDividers() {
 
 
 
-
-
 LaneDivider laneDividers[NUM_LANE_DIVIDERS];
 
 void initLaneDividers() {
