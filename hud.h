@@ -1,4 +1,3 @@
-#pragma once
 
 void drawHUD();
 void loadHighScore();

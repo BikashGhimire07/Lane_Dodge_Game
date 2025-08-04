@@ -1,12 +1,11 @@
 
-
-
+// =================== Includes ===================
+#include <fstream>
+#include <cstdio>
+#include <GL/glut.h>
 #include "hud.h"
 #include "utils.h"
 #include "game.h"
-#include <GL/glut.h>
-#include <fstream>
-#include <cstdio>
 
 
 void loadHighScore() {

@@ -1,6 +1,4 @@
-#pragma once
 
-// Screen and road constants
 #define SCREEN_WIDTH 600
 #define SCREEN_HEIGHT 800
 #define CAR_WIDTH 50
@@ -15,12 +13,10 @@
 #define ROAD_LEFT ((SCREEN_WIDTH - ROAD_WIDTH) / 2)
 #define ROAD_RIGHT (ROAD_LEFT + ROAD_WIDTH)
 
-// Speed settings
 #define PLAYER_INITIAL_KMH 60.0f
 #define PLAYER_SPEEDUP_KMH 10.0f
 #define CAR_KMH 40.0f
 #define BUS_KMH 40.0f
 #define TRUCK_KMH 40.0f
 
-// Conversion macro
 #define KMH_TO_PIXELS_PER_FRAME(kmh) ((kmh) * 0.18f)

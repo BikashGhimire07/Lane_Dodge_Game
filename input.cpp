@@ -1,6 +1,7 @@
 
-
-
+#include <GL/glut.h>
+#include <windows.h>
+#include <cstdlib>
 #include "input.h"
 #include "utils.h"
 #include "game.h"
@@ -8,9 +9,6 @@
 #include "vehicle.h"
 #include "road.h"
 #include "hud.h"
-#include <GL/glut.h>
-#include <windows.h>
-#include <cstdlib>
 
 #define PLAYER_START_Y 50
 #define PLAYER_INITIAL_KMH 60.0f
@@ -38,74 +36,42 @@ void keyboard(int key, int x, int y) {
 }
 
 void keyboardUp(unsigned char key, int x, int y) {
+    if (showMenu || gameOver) {
+        return;
+    }
     HWND hwnd;
     HMENU hMenu;
-    if (gameOver) {
-        switch (key) {
-            case 'r':
-            case 'R':
-                playerLane = 1;
-                playerLaneOffset = 2;
-                playerY = PLAYER_START_Y;
-                playerCrashed = false;
-                playerVisible = true;
-                gameOver = false;
-                score = 0;
-                lives = 3;
-                playerKmh = PLAYER_INITIAL_KMH;
-                playerBaseSpeed = KMH_TO_PIXELS_PER_FRAME(PLAYER_INITIAL_KMH);
-                playerMaxSpeed = playerBaseSpeed;
-                activeOppositeCars = 0;
-                hwnd = FindWindowA(NULL, "Lane Dodge Car Game");
-                if (hwnd) {
-                    hMenu = GetSystemMenu(hwnd, FALSE);
-                    if (hMenu) {
-                        EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
-                    }
+    switch (key) {
+        case 'r':
+        case 'R':
+            playerLane = 1;
+            playerLaneOffset = 2;
+            playerY = PLAYER_START_Y;
+            playerCrashed = false;
+            playerVisible = true;
+            gameOver = false;
+            score = 0;
+            lives = 3;
+            playerKmh = PLAYER_INITIAL_KMH;
+            playerBaseSpeed = KMH_TO_PIXELS_PER_FRAME(PLAYER_INITIAL_KMH);
+            playerMaxSpeed = playerBaseSpeed;
+            activeOppositeCars = 0;
+            hwnd = FindWindowA(NULL, "Lane Dodge Car Game");
+            if (hwnd) {
+                hMenu = GetSystemMenu(hwnd, FALSE);
+                if (hMenu) {
+                    EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
                 }
-                initOppositeCars();
-                initLaneDividers();
-                glutPostRedisplay();
-                glutTimerFunc(1000 / 60, NULL, 0);
-                break;
-            case 'q':
-            case 'Q':
-                exit(0);
-                break;
-        }
-    } else {
-        switch (key) {
-            case 'r':
-            case 'R':
-                playerLane = 1;
-                playerLaneOffset = 2;
-                playerY = PLAYER_START_Y;
-                playerCrashed = false;
-                playerVisible = true;
-                gameOver = false;
-                score = 0;
-                lives = 3;
-                playerKmh = PLAYER_INITIAL_KMH;
-                playerBaseSpeed = KMH_TO_PIXELS_PER_FRAME(PLAYER_INITIAL_KMH);
-                playerMaxSpeed = playerBaseSpeed;
-                activeOppositeCars = 0;
-                hwnd = FindWindowA(NULL, "Lane Dodge Car Game");
-                if (hwnd) {
-                    hMenu = GetSystemMenu(hwnd, FALSE);
-                    if (hMenu) {
-                        EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
-                    }
-                }
-                initOppositeCars();
-                initLaneDividers();
-                glutPostRedisplay();
-                glutTimerFunc(1000 / 60, NULL, 0);
-                break;
-            case 'q':
-            case 'Q':
-                exit(0);
-                break;
-        }
+            }
+            initOppositeCars();
+            initLaneDividers();
+            glutPostRedisplay();
+            glutTimerFunc(1000 / 60, timer, 0);
+            break;
+        case 'q':
+        case 'Q':
+            exit(0);
+            break;
     }
     glutPostRedisplay();
 }

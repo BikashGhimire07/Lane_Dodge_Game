@@ -1,3 +1,143 @@
+
+// =================== Includes ===================
+#include <windows.h>
+#include <mmsystem.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cmath>
+#include <GL/glut.h>
+#pragma comment(lib, "winmm.lib")
+#include "constants.h"
+#include "utils.h"
+#include "game.h"
+#include "player.h"
+#include "vehicle.h"
+#include "road.h"
+#include "hud.h"
+#include "input.h"
+
+// Ensure GLUT mouse constants are available before mouseMenu
+#ifndef GLUT_LEFT_BUTTON
+#define GLUT_LEFT_BUTTON 0
+#endif
+#ifndef GLUT_DOWN
+#define GLUT_DOWN 0
+#endif
+
+// =================== Global Variables ===================
+bool normalMusicPlaying = false;
+bool crashMusicPlaying = false;
+
+// =================== Function Definitions ===================
+
+// Audio helper functions for MP3 playback
+void playMP3(const char* alias, const char* filename, bool loop) {
+    char cmd[256];
+    sprintf(cmd, "open \"%s\" type mpegvideo alias %s", filename, alias);
+    mciSendString(cmd, NULL, 0, NULL);
+    sprintf(cmd, "play %s%s", alias, loop ? " repeat" : "");
+    mciSendString(cmd, NULL, 0, NULL);
+}
+
+void stopMP3(const char* alias) {
+    char cmd[64];
+    sprintf(cmd, "stop %s", alias);
+    mciSendString(cmd, NULL, 0, NULL);
+    sprintf(cmd, "close %s", alias);
+    mciSendString(cmd, NULL, 0, NULL);
+}
+
+// Audio state (should be extern in header, defined in game.cpp)
+extern bool normalMusicPlaying;
+extern bool crashMusicPlaying;
+extern bool playerCrashed;
+
+void handleAudio() {
+    if (playerCrashed) {
+        if (normalMusicPlaying) {
+            stopMP3("normal");
+            normalMusicPlaying = false;
+        }
+        if (!crashMusicPlaying) {
+            playMP3("crash", "audio/crashed.mp3", false);
+            crashMusicPlaying = true;
+        }
+    } else {
+        if (!normalMusicPlaying) {
+            playMP3("normal", "audio/normal.mp3", true);
+            normalMusicPlaying = true;
+        }
+        if (crashMusicPlaying) {
+            stopMP3("crash");
+            crashMusicPlaying = false;
+        }
+    }
+}
+
+// Mouse handler for menu buttons
+extern bool showMenu;
+extern bool gameOver;
+extern int playerLane;
+extern int playerLaneOffset;
+extern float playerY;
+extern bool playerVisible;
+extern int score;
+extern int lives;
+extern float playerKmh;
+extern float playerBaseSpeed;
+extern float playerMaxSpeed;
+extern int activeOppositeCars;
+extern void initOppositeCars();
+extern void initLaneDividers();
+
+void mouseMenu(int button, int state, int x, int y) {
+    if (!showMenu && !gameOver) return;
+    if (button != GLUT_LEFT_BUTTON || state != GLUT_DOWN) return;
+    // Convert y to OpenGL coordinates (origin at bottom left)
+    int oglY = SCREEN_HEIGHT - y;
+    // Button positions must match those in drawMenu()
+    float btnW = 120, btnH = 40;
+    float playBtnX = SCREEN_WIDTH/2 - btnW - 20, playBtnY = SCREEN_HEIGHT/2 - 40;
+    float quitBtnX = SCREEN_WIDTH/2 + 20, quitBtnY = playBtnY;
+    // Check Play button
+    if (x >= playBtnX && x <= playBtnX + btnW && oglY >= playBtnY && oglY <= playBtnY + btnH) {
+        // Start or restart game
+        showMenu = false;
+        if (gameOver) {
+            // Reset all game state for restart
+            playerLane = 1;
+            playerLaneOffset = 2;
+            playerY = PLAYER_START_Y;
+            playerCrashed = false;
+            playerVisible = true;
+            gameOver = false;
+            score = 0;
+            lives = 3;
+            playerKmh = PLAYER_INITIAL_KMH;
+            playerBaseSpeed = KMH_TO_PIXELS_PER_FRAME(PLAYER_INITIAL_KMH);
+            playerMaxSpeed = playerBaseSpeed;
+            activeOppositeCars = 0;
+            initOppositeCars();
+            initLaneDividers();
+            // Re-enable the window close (X) button
+            HWND hwnd = FindWindowA(NULL, "Lane Dodge Car Game");
+            if (hwnd) {
+                HMENU hMenu = GetSystemMenu(hwnd, FALSE);
+                if (hMenu) {
+                    EnableMenuItem(hMenu, SC_CLOSE, MF_BYCOMMAND | MF_ENABLED);
+                }
+            }
+            // Restart the timer so the game resumes
+            glutTimerFunc(1000 / 60, timer, 0);
+        }
+        glutPostRedisplay();
+        return;
+    }
+    // Check Quit button
+    if (x >= quitBtnX && x <= quitBtnX + btnW && oglY >= quitBtnY && oglY <= quitBtnY + btnH) {
+        exit(0);
+    }
+}
 #include <windows.h>
 #include <GL/glut.h>
 #include <stdlib.h>
@@ -7,7 +147,6 @@
 #include <string>
 #include<iostream>
 #include "constants.h"
-#include "utils.h"
 #include "utils.h"
 #include "player.h"
 #include "vehicle.h"
@@ -81,71 +220,135 @@ void drawCrashEffect() {
 
 
 
+// Draws the Play/Quit menu (for both startup and game over)
+void drawMenu(bool isGameOver) {
+    char buf[128];
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    float boxW = 420, boxH = isGameOver ? 260 : 200;
+    float boxX = SCREEN_WIDTH/2 - boxW/2, boxY = SCREEN_HEIGHT/2 - boxH/2;
+    // Background box
+    glColor4f(0.08f, 0.08f, 0.08f, 0.92f);
+    glBegin(GL_QUADS);
+    glVertex2f(boxX, boxY);
+    glVertex2f(boxX + boxW, boxY);
+    glVertex2f(boxX + boxW, boxY + boxH);
+    glVertex2f(boxX, boxY + boxH);
+    glEnd();
+    // Border
+    glLineWidth(4);
+    glColor3f(0.2f, 0.8f, 1.0f);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(boxX, boxY);
+    glVertex2f(boxX + boxW, boxY);
+    glVertex2f(boxX + boxW, boxY + boxH);
+    glVertex2f(boxX, boxY + boxH);
+    glEnd();
+    glLineWidth(1);
+
+    // Title
+    if (isGameOver) {
+        sprintf(buf, "GAME OVER");
+        glColor3f(1, 0.2f, 0.2f);
+        glRasterPos2f(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 + 80);
+        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
+        // Final score
+        sprintf(buf, "Final Score: %d", score);
+        glColor3f(1, 1, 0.2f);
+        glRasterPos2f(SCREEN_WIDTH / 2 - 90, SCREEN_HEIGHT / 2 + 40);
+        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+        // High score
+        sprintf(buf, "High Score: %d", highScore);
+        glColor3f(0.5f, 1.0f, 0.5f);
+        glRasterPos2f(SCREEN_WIDTH / 2 - 90, SCREEN_HEIGHT / 2 + 10);
+        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+    } else {
+        sprintf(buf, "LANE DODGE CAR GAME");
+        glColor3f(0.2f, 1.0f, 0.7f);
+        glRasterPos2f(SCREEN_WIDTH / 2 - 160, SCREEN_HEIGHT / 2 + 60);
+        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
+        sprintf(buf, "by Bikash0717");
+        glColor3f(0.7f, 0.7f, 1.0f);
+        glRasterPos2f(SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 30);
+        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+    }
+
+    // Draw Play button
+    float btnW = 120, btnH = 40;
+    float playBtnX = SCREEN_WIDTH/2 - btnW - 20, playBtnY = SCREEN_HEIGHT/2 - 40;
+    float quitBtnX = SCREEN_WIDTH/2 + 20, quitBtnY = playBtnY;
+    // Play button
+    glColor3f(0.2f, 0.8f, 0.3f);
+    glBegin(GL_QUADS);
+    glVertex2f(playBtnX, playBtnY);
+    glVertex2f(playBtnX + btnW, playBtnY);
+    glVertex2f(playBtnX + btnW, playBtnY + btnH);
+    glVertex2f(playBtnX, playBtnY + btnH);
+    glEnd();
+    glColor3f(0, 0.2f, 0);
+    glLineWidth(2);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(playBtnX, playBtnY);
+    glVertex2f(playBtnX + btnW, playBtnY);
+    glVertex2f(playBtnX + btnW, playBtnY + btnH);
+    glVertex2f(playBtnX, playBtnY + btnH);
+    glEnd();
+    glLineWidth(1);
+    sprintf(buf, "PLAY");
+    glColor3f(1, 1, 1);
+    glRasterPos2f(playBtnX + 32, playBtnY + 25);
+    for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+
+    // Quit button
+    glColor3f(0.8f, 0.2f, 0.2f);
+    glBegin(GL_QUADS);
+    glVertex2f(quitBtnX, quitBtnY);
+    glVertex2f(quitBtnX + btnW, quitBtnY);
+    glVertex2f(quitBtnX + btnW, quitBtnY + btnH);
+    glVertex2f(quitBtnX, quitBtnY + btnH);
+    glEnd();
+    glColor3f(0.2f, 0, 0);
+    glLineWidth(2);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(quitBtnX, quitBtnY);
+    glVertex2f(quitBtnX + btnW, quitBtnY);
+    glVertex2f(quitBtnX + btnW, quitBtnY + btnH);
+    glVertex2f(quitBtnX, quitBtnY + btnH);
+    glEnd();
+    glLineWidth(1);
+    sprintf(buf, "QUIT");
+    glColor3f(1, 1, 1);
+    glRasterPos2f(quitBtnX + 32, quitBtnY + 25);
+    for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+
+    // Instructions
+    glColor3f(0.8f, 0.8f, 1.0f);
+    if (isGameOver) {
+        sprintf(buf, "Click PLAY to Restart or QUIT to Exit");
+        glRasterPos2f(SCREEN_WIDTH / 2 - 120, SCREEN_HEIGHT / 2 - 70);
+    } else {
+        sprintf(buf, "Click PLAY to Start or QUIT to Exit");
+        glRasterPos2f(SCREEN_WIDTH / 2 - 110, SCREEN_HEIGHT / 2 - 70);
+    }
+    for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+    glDisable(GL_BLEND);
+}
+
 void display() {
     glClear(GL_COLOR_BUFFER_BIT);
-    drawRoadSides();
-    drawLaneDividers();
-    if (gameOver) {
-        // Draw Game Over UI
-        char buf[64];
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glColor4f(0.08f, 0.08f, 0.08f, 0.85f);
-        float boxW = 380, boxH = 140;
-        float boxX = SCREEN_WIDTH/2 - boxW/2, boxY = SCREEN_HEIGHT/2 - boxH/2;
-        glBegin(GL_QUADS);
-        glVertex2f(boxX, boxY);
-        glVertex2f(boxX + boxW, boxY);
-        glVertex2f(boxX + boxW, boxY + boxH);
-        glVertex2f(boxX, boxY + boxH);
-        glEnd();
-        // Border
-        glLineWidth(4);
-        glColor3f(1, 0.2f, 0.2f);
-        glBegin(GL_LINE_LOOP);
-        glVertex2f(boxX, boxY);
-        glVertex2f(boxX + boxW, boxY);
-        glVertex2f(boxX + boxW, boxY + boxH);
-        glVertex2f(boxX, boxY + boxH);
-        glEnd();
-        glLineWidth(1);
-        // Draw shadow for 'GAME OVER'
-        sprintf(buf, "GAME OVER");
-        glColor3f(0, 0, 0);
-        glRasterPos2f(SCREEN_WIDTH / 2 - 92, SCREEN_HEIGHT / 2 + 38);
-        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
-        // Main text
-        glColor3f(1, 0.2f, 0.2f);
-        glRasterPos2f(SCREEN_WIDTH / 2 - 100, SCREEN_HEIGHT / 2 + 40);
-        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
-        // Draw score and high score with shadow
-        sprintf(buf, "Final Score: %d", score);
-        glColor3f(0, 0, 0);
-        glRasterPos2f(SCREEN_WIDTH / 2 - 82, SCREEN_HEIGHT / 2 - 2);
-        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
-        glColor3f(1, 1, 0.2f);
-        glRasterPos2f(SCREEN_WIDTH / 2 - 90, SCREEN_HEIGHT / 2);
-        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
-        
-        // Draw high score
-        sprintf(buf, "High Score: %d", highScore);
-        glColor3f(0, 0, 0);
-        glRasterPos2f(SCREEN_WIDTH / 2 - 82, SCREEN_HEIGHT / 2 - 32);
-        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
-        glColor3f(0.5f, 1.0f, 0.5f);
-        glRasterPos2f(SCREEN_WIDTH / 2 - 90, SCREEN_HEIGHT / 2 - 30);
-        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
-        
-        // Draw restart/quit instructions
-        glColor3f(0.8f, 0.8f, 1.0f);
-        sprintf(buf, "Press 'R' to Restart   or   'Q' to Quit");
-        glRasterPos2f(SCREEN_WIDTH / 2 - 120, SCREEN_HEIGHT / 2 - 50);
-        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
-        
-        glDisable(GL_BLEND);
+    extern bool showMenu;
+    if (showMenu) {
+        drawMenu(false);
         glutSwapBuffers();
         return;
     }
+    if (gameOver) {
+        drawMenu(true);
+        glutSwapBuffers();
+        return;
+    }
+    drawRoadSides();
+    drawLaneDividers();
     if (playerCrashed && respawnTimer > 0) {
         drawCrashEffect();
     }

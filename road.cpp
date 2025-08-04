@@ -1,7 +1,7 @@
+#include <GL/glut.h>
 #include "road.h"
 #include "utils.h"
 #include "game.h"
-#include <GL/glut.h>
 void updateLaneDividers() {
     for (int i = 0; i < NUM_LANE_DIVIDERS; i++) {
         laneDividers[i].y -= playerBaseSpeed;

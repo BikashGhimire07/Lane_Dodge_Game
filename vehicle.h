@@ -1,7 +1,6 @@
-void updateOppositeCars();
-void drawOppositeCars();
 
-#pragma once
+#ifndef VEHICLE_H
+#define VEHICLE_H
 
 #define NUM_OPPOSITE_CARS 6
 #define NUM_LANES 4
@@ -30,4 +29,6 @@ void drawOppositeCars();
 void setVehicleType(Car& c);
 void updateVehicleSpeedByType(Car& c);
 extern Car oppositeCars[NUM_OPPOSITE_CARS];
+
+#endif // VEHICLE_H
 

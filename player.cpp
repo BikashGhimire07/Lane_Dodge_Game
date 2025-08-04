@@ -1,12 +1,9 @@
 
-#include "player.h"
-#include "utils.h"
-#include "game.h"      // for game state variables
-#include "utils.h"
 #include <GL/glut.h>
 #include <cmath>
-
-
+#include "player.h"
+#include "utils.h"
+#include "game.h"
 
 #define CAR_WIDTH 50
 #define CAR_HEIGHT 70
@@ -15,7 +12,6 @@ void drawPlayerCar() {
     if (!playerVisible) return;
     float playerX = lanePosX(playerLane, playerLaneOffset);
     float alpha = 1.0f;
-    // Fade in logic can be handled elsewhere if needed
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4f(1, 1, 1, alpha);

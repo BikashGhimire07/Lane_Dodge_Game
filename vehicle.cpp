@@ -1,12 +1,12 @@
 
-#include "vehicle.h"
-#include "utils.h"
-#include "game.h"
-#include "utils.h"
+// =================== Includes ===================
 #include <GL/glut.h>
 #include <cstdlib>
 #include <ctime>
 #include <cmath>
+#include "vehicle.h"
+#include "utils.h"
+#include "game.h"
 
 Car oppositeCars[NUM_OPPOSITE_CARS];
 
