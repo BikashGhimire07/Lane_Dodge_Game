@@ -1,0 +1,147 @@
+
+#include "player.h"
+#include "utils.h"
+#include "game.h"      // for game state variables
+#include "utils.h"
+#include <GL/glut.h>
+#include <cmath>
+
+
+
+#define CAR_WIDTH 50
+#define CAR_HEIGHT 70
+
+void drawPlayerCar() {
+    if (!playerVisible) return;
+    float playerX = lanePosX(playerLane, playerLaneOffset);
+    float alpha = 1.0f;
+    // Fade in logic can be handled elsewhere if needed
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glColor4f(1, 1, 1, alpha);
+    glBegin(GL_POLYGON);
+    glVertex2f(playerX + 8, playerY + 10);
+    glVertex2f(playerX + CAR_WIDTH - 8, playerY + 10);
+    glVertex2f(playerX + CAR_WIDTH - 4, playerY + 20);
+    glVertex2f(playerX + CAR_WIDTH - 2, playerY + 30);
+    glVertex2f(playerX + CAR_WIDTH - 4, playerY + CAR_HEIGHT - 12);
+    glVertex2f(playerX + CAR_WIDTH - 10, playerY + CAR_HEIGHT - 4);
+    glVertex2f(playerX + 10, playerY + CAR_HEIGHT - 4);
+    glVertex2f(playerX + 4, playerY + CAR_HEIGHT - 12);
+    glVertex2f(playerX + 2, playerY + 30);
+    glVertex2f(playerX + 4, playerY + 20);
+    glEnd();
+    glColor4f(0.1f, 0.3f, 0.8f, alpha);
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + CAR_WIDTH / 2 - 4, playerY + 10);
+    glVertex2f(playerX + CAR_WIDTH / 2 + 4, playerY + 10);
+    glVertex2f(playerX + CAR_WIDTH / 2 + 8, playerY + CAR_HEIGHT - 4);
+    glVertex2f(playerX + CAR_WIDTH / 2 - 8, playerY + CAR_HEIGHT - 4);
+    glEnd();
+    glColor4f(0.85f, 0.85f, 0.85f, alpha);
+    glBegin(GL_POLYGON);
+    glVertex2f(playerX + 12, playerY + CAR_HEIGHT - 32);
+    glVertex2f(playerX + CAR_WIDTH - 12, playerY + CAR_HEIGHT - 32);
+    glVertex2f(playerX + CAR_WIDTH - 8, playerY + CAR_HEIGHT - 18);
+    glVertex2f(playerX + CAR_WIDTH - 10, playerY + CAR_HEIGHT - 10);
+    glVertex2f(playerX + 10, playerY + CAR_HEIGHT - 10);
+    glVertex2f(playerX + 8, playerY + CAR_HEIGHT - 18);
+    glEnd();
+    glColor4f(0.5f, 0.8f, 1.0f, alpha);
+    glBegin(GL_POLYGON);
+    glVertex2f(playerX + 16, playerY + CAR_HEIGHT - 28);
+    glVertex2f(playerX + CAR_WIDTH - 16, playerY + CAR_HEIGHT - 28);
+    glVertex2f(playerX + CAR_WIDTH - 14, playerY + CAR_HEIGHT - 18);
+    glVertex2f(playerX + 14, playerY + CAR_HEIGHT - 18);
+    glEnd();
+    glColor4f(0.1f, 0.1f, 0.1f, alpha);
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + 16, playerY + 6);
+    glVertex2f(playerX + 19, playerY + 6);
+    glVertex2f(playerX + 19, playerY + 14);
+    glVertex2f(playerX + 16, playerY + 14);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + CAR_WIDTH - 19, playerY + 6);
+    glVertex2f(playerX + CAR_WIDTH - 16, playerY + 6);
+    glVertex2f(playerX + CAR_WIDTH - 16, playerY + 14);
+    glVertex2f(playerX + CAR_WIDTH - 19, playerY + 14);
+    glEnd();
+    glColor4f(0.7f, 0.8f, 1.0f, alpha);
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + 10, playerY + 2);
+    glVertex2f(playerX + 15, playerY + 2);
+    glVertex2f(playerX + 15, playerY + 8);
+    glVertex2f(playerX + 10, playerY + 8);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + CAR_WIDTH - 15, playerY + 2);
+    glVertex2f(playerX + CAR_WIDTH - 10, playerY + 2);
+    glVertex2f(playerX + CAR_WIDTH - 10, playerY + 8);
+    glVertex2f(playerX + CAR_WIDTH - 15, playerY + 8);
+    glEnd();
+    glColor4f(0.2f, 0.4f, 1.0f, alpha);
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(playerX + 9, playerY + 1);
+    glVertex2f(playerX + 16, playerY + 1);
+    glVertex2f(playerX + 16, playerY + 9);
+    glVertex2f(playerX + 9, playerY + 9);
+    glEnd();
+    glBegin(GL_LINE_LOOP);
+    glVertex2f(playerX + CAR_WIDTH - 16, playerY + 1);
+    glVertex2f(playerX + CAR_WIDTH - 9, playerY + 1);
+    glVertex2f(playerX + CAR_WIDTH - 9, playerY + 9);
+    glVertex2f(playerX + CAR_WIDTH - 16, playerY + 9);
+    glEnd();
+    glColor4f(0, 0, 0, alpha);
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + 4, playerY + 8);
+    glVertex2f(playerX + 10, playerY + 8);
+    glVertex2f(playerX + 10, playerY + 18);
+    glVertex2f(playerX + 4, playerY + 18);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + CAR_WIDTH - 10, playerY + 8);
+    glVertex2f(playerX + CAR_WIDTH - 4, playerY + 8);
+    glVertex2f(playerX + CAR_WIDTH - 4, playerY + 18);
+    glVertex2f(playerX + CAR_WIDTH - 10, playerY + 18);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + 4, playerY + CAR_HEIGHT - 18);
+    glVertex2f(playerX + 10, playerY + CAR_HEIGHT - 18);
+    glVertex2f(playerX + 10, playerY + CAR_HEIGHT - 8);
+    glVertex2f(playerX + 4, playerY + CAR_HEIGHT - 8);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + CAR_WIDTH - 10, playerY + CAR_HEIGHT - 18);
+    glVertex2f(playerX + CAR_WIDTH - 4, playerY + CAR_HEIGHT - 18);
+    glVertex2f(playerX + CAR_WIDTH - 4, playerY + CAR_HEIGHT - 8);
+    glVertex2f(playerX + CAR_WIDTH - 10, playerY + CAR_HEIGHT - 8);
+    glEnd();
+    glColor4f(0.8f, 0.8f, 0.8f, alpha);
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + 6, playerY + 11);
+    glVertex2f(playerX + 8, playerY + 11);
+    glVertex2f(playerX + 8, playerY + 15);
+    glVertex2f(playerX + 6, playerY + 15);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + CAR_WIDTH - 8, playerY + 11);
+    glVertex2f(playerX + CAR_WIDTH - 6, playerY + 11);
+    glVertex2f(playerX + CAR_WIDTH - 6, playerY + 15);
+    glVertex2f(playerX + CAR_WIDTH - 8, playerY + 15);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + 6, playerY + CAR_HEIGHT - 15);
+    glVertex2f(playerX + 8, playerY + CAR_HEIGHT - 15);
+    glVertex2f(playerX + 8, playerY + CAR_HEIGHT - 11);
+    glVertex2f(playerX + 6, playerY + CAR_HEIGHT - 11);
+    glEnd();
+    glBegin(GL_QUADS);
+    glVertex2f(playerX + CAR_WIDTH - 8, playerY + CAR_HEIGHT - 15);
+    glVertex2f(playerX + CAR_WIDTH - 6, playerY + CAR_HEIGHT - 15);
+    glVertex2f(playerX + CAR_WIDTH - 6, playerY + CAR_HEIGHT - 11);
+    glVertex2f(playerX + CAR_WIDTH - 8, playerY + CAR_HEIGHT - 11);
+    glEnd();
+    glDisable(GL_BLEND);
+}

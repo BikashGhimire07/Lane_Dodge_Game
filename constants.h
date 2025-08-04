@@ -1,0 +1,26 @@
+#pragma once
+
+// Screen and road constants
+#define SCREEN_WIDTH 600
+#define SCREEN_HEIGHT 800
+#define CAR_WIDTH 50
+#define CAR_HEIGHT 70
+#define PLAYER_START_X (SCREEN_WIDTH / 2 - CAR_WIDTH / 2)
+#define PLAYER_START_Y 50
+#define NUM_OPPOSITE_CARS 6
+#define NUM_LANE_DIVIDERS 15
+#define LANE_WIDTH 120
+#define NUM_LANES 4
+#define ROAD_WIDTH (NUM_LANES * LANE_WIDTH)
+#define ROAD_LEFT ((SCREEN_WIDTH - ROAD_WIDTH) / 2)
+#define ROAD_RIGHT (ROAD_LEFT + ROAD_WIDTH)
+
+// Speed settings
+#define PLAYER_INITIAL_KMH 60.0f
+#define PLAYER_SPEEDUP_KMH 10.0f
+#define CAR_KMH 40.0f
+#define BUS_KMH 40.0f
+#define TRUCK_KMH 40.0f
+
+// Conversion macro
+#define KMH_TO_PIXELS_PER_FRAME(kmh) ((kmh) * 0.18f)
