@@ -12,8 +12,6 @@ void drawPlayerCar() {
     if (!playerVisible) return;
     float playerX = lanePosX(playerLane, playerLaneOffset);
     float alpha = 1.0f;
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glColor4f(1, 1, 1, alpha);
     glBegin(GL_POLYGON);
     glVertex2f(playerX + 8, playerY + 10);
@@ -139,5 +137,5 @@ void drawPlayerCar() {
     glVertex2f(playerX + CAR_WIDTH - 6, playerY + CAR_HEIGHT - 11);
     glVertex2f(playerX + CAR_WIDTH - 8, playerY + CAR_HEIGHT - 11);
     glEnd();
-    glDisable(GL_BLEND);
+    
 }

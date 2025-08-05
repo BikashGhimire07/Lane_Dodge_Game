@@ -29,7 +29,7 @@ void setVehicleType(Car& c) {
         c.r = 0.8f; c.g = 0.7f; c.b = 0.2f;
     }
     float baseSpeed;
-    if (c.type == VEHICLE_CAR) baseSpeed = 50 * 0.18f;
+    if (c.type == VEHICLE_CAR) baseSpeed = 45 * 0.18f;
     else if (c.type == VEHICLE_BUS) baseSpeed = 35 * 0.18f;
     else baseSpeed = 40 * 0.18f;
     c.speed = baseSpeed;
@@ -40,7 +40,7 @@ void setVehicleType(Car& c) {
 
 void updateVehicleSpeedByType(Car& c) {
     float baseSpeed;
-    if (c.type == VEHICLE_CAR) baseSpeed = 50 * 0.18f;
+    if (c.type == VEHICLE_CAR) baseSpeed = 45 * 0.18f;
     else if (c.type == VEHICLE_BUS) baseSpeed = 35 * 0.18f;
     else baseSpeed = 40 * 0.18f;
     c.speed = baseSpeed;

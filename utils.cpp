@@ -46,7 +46,7 @@ void stopMP3(const char* alias) {
 
 
 void handleAudio() {
-    // Always play normal background music
+ 
     if (!normalMusicPlaying) {
         playMP3("normal", "audio/normal.mp3", true);
         normalMusicPlaying = true;
@@ -65,7 +65,7 @@ void handleAudio() {
     }
 }
 
-// Mouse handler for menu buttons
+// handling mouse click on the menu
 
 
 void mouseMenu(int button, int state, int x, int y) {
@@ -117,20 +117,13 @@ void mouseMenu(int button, int state, int x, int y) {
 
 
 
-// Get lane position x with offset
-// Structures
-
-
-
-
-
 float lanePosX(int lane, int offset, float carWidth) {
     float base = ROAD_LEFT + lane * LANE_WIDTH;
     float step = (LANE_WIDTH - carWidth) / 3.0f;
     return base + offset * step;
 }
 
-// Global variable definitions
+
 
 
 
@@ -226,10 +219,7 @@ void drawMenu(bool isGameOver) {
         glColor3f(0.2f, 1.0f, 0.7f);
         glRasterPos2f(SCREEN_WIDTH / 2 - 160, SCREEN_HEIGHT / 2 + 60);
         for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, *c);
-        sprintf(buf, "by Bikash0717");
-        glColor3f(0.7f, 0.7f, 1.0f);
-        glRasterPos2f(SCREEN_WIDTH / 2 - 70, SCREEN_HEIGHT / 2 + 30);
-        for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+        
     }
 
     // Draw Play button
@@ -255,7 +245,7 @@ void drawMenu(bool isGameOver) {
     glLineWidth(1);
     sprintf(buf, "PLAY");
     glColor3f(1, 1, 1);
-    glRasterPos2f(playBtnX + 32, playBtnY + 25);
+    glRasterPos2f(playBtnX + 32, playBtnY + 15);
     for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
 
     // Quit button
@@ -277,7 +267,7 @@ void drawMenu(bool isGameOver) {
     glLineWidth(1);
     sprintf(buf, "QUIT");
     glColor3f(1, 1, 1);
-    glRasterPos2f(quitBtnX + 32, quitBtnY + 25);
+    glRasterPos2f(quitBtnX + 32, quitBtnY + 15);
     for (char* c = buf; *c; c++) glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
 
     // Instructions
@@ -313,18 +303,18 @@ void display() {
     }
     drawPlayerCar();
     drawOppositeCars();
-    // Do NOT draw the crashed vehicle (damaged/removed)
+    
     drawHUD();
     glutSwapBuffers();
 }
 
 void timer(int value) {
     if (showMenu) {
-        // Don't run game logic or timer until PLAY is pressed
+
         return;
     }
 
-    // Move lane dividers down always at playerBaseSpeed (simulate road movement)
+    
     for (int i = 0; i < NUM_LANE_DIVIDERS; i++) {
         laneDividers[i].y -= playerBaseSpeed;
         if (laneDividers[i].y < -40) laneDividers[i].y = SCREEN_HEIGHT;
@@ -373,7 +363,7 @@ void timer(int value) {
     }
 
     if (gameOver) {
-        // Game Over: just count down and exit after delay
+
         gameOverTimer--;
         if (gameOverTimer <= 0) {
             exit(0);
@@ -383,7 +373,7 @@ void timer(int value) {
         return;
     }
 
-    // Move only active cars (opposing cars always move at their own speed)
+   
     for (int i = 0; i < activeOppositeCars; i++) {
         if (!oppositeCars[i].active) continue;
 
@@ -405,9 +395,7 @@ void timer(int value) {
             // Keep the car in its lane if not changing
             oppositeCars[i].x = lanePosX(oppositeCars[i].lane, 2, oppositeCars[i].width);
         }
-        // Only the true rear-most BLOCKED vehicle in a lane can change lane if blocked
-        // For vehicles moving downward, rear-most is the one with the highest y (closest to bottom)
-        // First, check if this vehicle is blocked
+       
         int carAheadIdx = -1;
         float minDist = 1e9;
         for (int j = 0; j < NUM_OPPOSITE_CARS; j++) {
@@ -453,7 +441,7 @@ void timer(int value) {
                     if (jAheadIdx != -1 && jMinDist < CAR_HEIGHT + 10) {
                         jBlocked = true;
                     }
-                    // If there is a blocked car with a higher y (closer to bottom), then this is not the rear-most
+                    
                     if (jBlocked && oppositeCars[j].y > oppositeCars[i].y) {
                         isRearMostBlocked = false;
                         break;
@@ -472,7 +460,7 @@ void timer(int value) {
             }
         }
 
-        // Only set signalOn true if a lane change is performed in this frame
+        
         oppositeCars[i].signalOn = false;
 
         if (((blocked && isRearMostBlocked) || playerAhead) && (blocked || playerAhead)) {
@@ -569,7 +557,7 @@ void timer(int value) {
         }
     }
 
-    // Player car stays visually fixed
+    
 
     // Check collision (only if not crashed)
     if (!playerCrashed) {
@@ -580,7 +568,7 @@ void timer(int value) {
                 gameOver = true;
                 gameOverTimer = GAME_OVER_DELAY;
                 updateHighScore();
-                // Disable the close button (X) when game is over
+            
                 HWND hwnd = FindWindowA(NULL, "Lane Dodge Car Game");
                 if (hwnd) {
                     HMENU hMenu = GetSystemMenu(hwnd, FALSE);

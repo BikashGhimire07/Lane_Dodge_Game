@@ -15,8 +15,6 @@
 
 #define PLAYER_INITIAL_KMH 60.0f
 #define PLAYER_SPEEDUP_KMH 10.0f
-#define CAR_KMH 40.0f
-#define BUS_KMH 40.0f
-#define TRUCK_KMH 40.0f
+
 
 #define KMH_TO_PIXELS_PER_FRAME(kmh) ((kmh) * 0.18f)

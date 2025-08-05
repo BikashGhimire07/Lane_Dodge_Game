@@ -30,5 +30,5 @@ void setVehicleType(Car& c);
 void updateVehicleSpeedByType(Car& c);
 extern Car oppositeCars[NUM_OPPOSITE_CARS];
 
-#endif // VEHICLE_H
+#endif 
 
